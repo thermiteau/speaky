@@ -25,4 +25,4 @@ jobs:
         with:
           version: "0.1.0"
       - name: Run PyTest
-        run: uv pytest
+        run: uv run pytest
