@@ -1,0 +1,20 @@
+name: Build and test Speaky
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+jobs:
+  deploy:
+    environment: ${{ github.ref == 'refs/heads/main' && 'prd' || 'dev' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: uv pytest
