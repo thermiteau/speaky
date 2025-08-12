@@ -1,13 +1,30 @@
 [project]
 name = "speaky"
 version = "0.1.0"
-description = "Add your description here"
+description = "Command-line text-to-speech using OpenAI TTS API"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "load-dotenv>=0.1.0",
     "openai[voice-helpers]>=1.98.0",
+    "platformdirs>=4.0.0",
     "pyaudio>=0.2.14",
     "python-vlc>=3.0.21203",
     "pyttsx3>=2.99",
+]
+
+[project.scripts]
+speaky = "speaky.main:cli_main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["speaky*"]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
 ]
