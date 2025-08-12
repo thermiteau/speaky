@@ -11,10 +11,18 @@ env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
 jobs:
-  deploy:
+  build:
     environment: ${{ github.ref == 'refs/heads/main' && 'prd' || 'dev' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Test
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.1.0"
+      - name: Run PyTest
         run: uv pytest
