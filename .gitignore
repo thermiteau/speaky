@@ -11,5 +11,3 @@ wheels/
 
 # App
 .env
-cache/*.mp3
-!cache/.keepme
