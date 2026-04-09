@@ -3,7 +3,7 @@
 import asyncio
 import argparse
 import sys
-from .config import load_config
+from .config import load_config, install_default_config
 from .tts import generate_and_cache_audio
 from .audio import play_audio_file
 from .cache import clear_cache
@@ -67,6 +67,7 @@ async def main():
 
 def cli_main():
     """Entry point for console script."""
+    install_default_config()
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

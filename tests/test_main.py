@@ -191,37 +191,35 @@ class TestMain:
 class TestCliMain:
     """Tests for cli_main function."""
     
+    @patch('speaky.main.install_default_config')
     @patch('speaky.main.asyncio.run')
-    def test_cli_main_success(self, mock_asyncio_run):
+    def test_cli_main_success(self, mock_asyncio_run, mock_install_config):
         """Test cli_main function successful execution."""
-        # Execute
         cli_main()
-        
-        # Verify
+
+        mock_install_config.assert_called_once()
         mock_asyncio_run.assert_called_once()
-    
+
+    @patch('speaky.main.install_default_config')
     @patch('speaky.main.asyncio.run')
-    def test_cli_main_keyboard_interrupt(self, mock_asyncio_run):
+    def test_cli_main_keyboard_interrupt(self, mock_asyncio_run, mock_install_config):
         """Test cli_main function with keyboard interrupt."""
-        # Setup
         mock_asyncio_run.side_effect = KeyboardInterrupt()
-        
-        # Execute & Verify
+
         with pytest.raises(SystemExit) as exc_info:
             cli_main()
-        
+
         assert exc_info.value.code == 1
-    
+
+    @patch('speaky.main.install_default_config')
     @patch('speaky.main.asyncio.run')
-    def test_cli_main_other_exception(self, mock_asyncio_run):
+    def test_cli_main_other_exception(self, mock_asyncio_run, mock_install_config):
         """Test cli_main function with other exceptions."""
-        # Setup
         mock_asyncio_run.side_effect = Exception("Some error")
-        
-        # Execute & Verify - should not catch other exceptions
+
         with pytest.raises(Exception) as exc_info:
             cli_main()
-        
+
         assert "Some error" in str(exc_info.value)
 
 

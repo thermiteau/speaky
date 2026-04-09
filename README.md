@@ -15,6 +15,8 @@ A fast, cross-platform command-line text-to-speech application powered by OpenAI
 ### Prerequisites
 
 - **Python 3.10+**: Modern Python installation
+- **C Compiler**: For PyAudio native extension
+  - **Ubuntu**: `sudo apt install -y build-essential portaudio19-dev python3-dev`
 - **VLC Media Player**: Required for audio playback
   - **Windows**: Download from [videolan.org](https://www.videolan.org/vlc/)
   - **macOS**: `brew install vlc` or download from website
@@ -24,6 +26,7 @@ A fast, cross-platform command-line text-to-speech application powered by OpenAI
 ### Installation
 
 #### Option 1: Install as Global Tool (Recommended)
+
 ```bash
 # Clone the repository
 git clone https://github.com/your-username/speaky.git
@@ -37,6 +40,7 @@ pipx install .
 ```
 
 #### Option 2: Development Installation
+
 ```bash
 # Clone and install in development mode
 git clone https://github.com/your-username/speaky.git
@@ -52,11 +56,13 @@ pip install -e .
 1. **Set up your OpenAI API key** (choose one method):
 
    **Environment variable:**
+
    ```bash
    export OPENAI_API_KEY="your-api-key-here"
    ```
 
    **Or create a `.env` file:**
+
    ```bash
    cp example.env .env
    # Edit .env and add your API key
@@ -91,6 +97,7 @@ speaky --clear-cache
 # Get help
 speaky --help
 ```
+
 ## How It Works
 
 1. **Input Processing**: Takes your text input from command line arguments
@@ -110,6 +117,7 @@ Speaky automatically stores cached audio files in platform-appropriate locations
 ## Voice Configuration
 
 Currently configured with:
+
 - **Voice**: Nova (cheerful, professional tone)
 - **Model**: gpt-4o-mini-tts
 - **Format**: MP3
@@ -180,6 +188,7 @@ uv run mypy speaky/
 ## API Usage Costs
 
 Speaky uses OpenAI's TTS API, which charges per character:
+
 - Current pricing: ~$0.015 per 1K characters
 - Example: 100 words (~500 characters) H $0.0075
 - **Caching minimizes costs** by reusing generated audio for identical text
@@ -189,22 +198,27 @@ Speaky uses OpenAI's TTS API, which charges per character:
 ### Common Issues
 
 **"speaky: command not found"**
+
 - Ensure you've installed with `uv tool install .` or `pipx install .`
 - Check that your PATH includes the installation directory
 
 **"OPENAI_API_KEY not found"**
+
 - Set environment variable: `export OPENAI_API_KEY="your-key"`
 - Or create `.env` file with your API key
 
 **"VLC not found" or audio playback issues**
+
 - Install VLC Media Player on your system
 - Ensure VLC is in your system PATH
 
 **Permission errors on cache directory**
+
 - Check write permissions for cache directory
 - Clear cache with `speaky --clear-cache`
 
 **API rate limit errors**
+
 - OpenAI has rate limits; wait a moment and try again
 - Caching helps reduce API calls for repeated text
 
@@ -226,6 +240,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Changelog
 
 ### v0.1.0
+
 - Initial release
 - OpenAI TTS integration
 - Cross-platform caching
