@@ -1,29 +1,22 @@
 """Main entry point for Speaky CLI."""
 
-import asyncio
 import argparse
+import asyncio
 import sys
-from .config import load_config
-from .tts import generate_and_cache_audio
 from .audio import play_audio_file
 from .cache import clear_cache
+from .config import load_config
+from .tts import generate_and_cache_audio  # type: ignore
 
 
 def parse_arguments():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Text-to-speech using OpenAI TTS API",
-        prog="speaky"
+        description="Text-to-speech using OpenAI TTS API", prog="speaky"
     )
+    parser.add_argument("text", nargs="*", help="Text to convert to speech")
     parser.add_argument(
-        "text",
-        nargs="*",
-        help="Text to convert to speech"
-    )
-    parser.add_argument(
-        "--clear-cache",
-        action="store_true",
-        help="Clear the audio cache and exit"
+        "--clear-cache", action="store_true", help="Clear the audio cache and exit"
     )
     return parser.parse_args()
 
@@ -31,28 +24,28 @@ def parse_arguments():
 async def main():
     """Main async function."""
     args = parse_arguments()
-    
+
     # Handle cache clearing
     if args.clear_cache:
         clear_cache()
         return
-    
+
     # Get text input
     if args.text:
         text = " ".join(args.text)
     else:
         text = "What would you like me to say?"
-    
+
     try:
         # Load configuration
         config = load_config()
-        
+
         # Generate and cache audio
         cache_file = await generate_and_cache_audio(text, config)
-        
+
         # Play audio
         play_audio_file(cache_file)
-        
+
     except ValueError as e:
         print(f"Configuration Error: {e}")
         sys.exit(1)

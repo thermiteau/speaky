@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Bash(pip show *)", "Bash(uv pip *)"],
+    "deny": []
+  }
+}
