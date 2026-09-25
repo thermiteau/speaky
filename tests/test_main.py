@@ -71,7 +71,7 @@ class TestMain:
     async def test_main_clear_cache(self, mock_parse_args, mock_clear_cache):
         """Test main function with clear cache option."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = True
         mock_parse_args.return_value = mock_args
         
@@ -90,7 +90,7 @@ class TestMain:
                                   mock_generate_audio, mock_play_audio):
         """Test main function with text input."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = False
         mock_args.text = ["hello", "world"]
         mock_parse_args.return_value = mock_args
@@ -118,7 +118,7 @@ class TestMain:
                                mock_generate_audio, mock_play_audio):
         """Test main function with no text input."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = False
         mock_args.text = []
         mock_parse_args.return_value = mock_args
@@ -141,7 +141,7 @@ class TestMain:
     async def test_main_config_error(self, mock_parse_args):
         """Test main function with configuration error."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = False
         mock_args.text = ["test"]
         mock_parse_args.return_value = mock_args
@@ -158,7 +158,7 @@ class TestMain:
     async def test_main_import_error(self, mock_parse_args):
         """Test main function with import error."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = False
         mock_args.text = ["test"]
         mock_parse_args.return_value = mock_args
@@ -175,7 +175,7 @@ class TestMain:
     async def test_main_unexpected_error(self, mock_parse_args):
         """Test main function with unexpected error."""
         # Setup
-        mock_args = MagicMock()
+        mock_args = MagicMock(file=None, show_output=False)
         mock_args.clear_cache = False
         mock_args.text = ["test"]
         mock_parse_args.return_value = mock_args
@@ -225,6 +225,81 @@ class TestCliMain:
 
 class TestIntegration:
     """Integration tests combining multiple components."""
+
+    @pytest.mark.parametrize("flag", ["--f", "--file"])
+    @pytest.mark.asyncio
+    async def test_speak_file(self, flag, tmp_path, capsys):
+        text_file = tmp_path / "message with spaces.txt"
+        content = "Hello café!\nSecond line.\n"
+        text_file.write_text(content, encoding="utf-8")
+        cache_file = tmp_path / "audio.mp3"
+        with patch.object(sys, "argv", ["speaky", flag, str(text_file), "--s"]), \
+             patch("speaky.main.load_config", return_value={}), \
+             patch("speaky.main.generate_and_cache_audio", return_value=cache_file) as generate, \
+             patch("speaky.main.play_audio_file") as playback:
+            await main()
+
+        generate.assert_awaited_once_with(content, {})
+        playback.assert_called_once_with(cache_file)
+        assert capsys.readouterr().out == f"{cache_file.resolve()}\n"
+
+    @pytest.mark.parametrize("kind", ["missing", "directory", "invalid_utf8"])
+    @pytest.mark.asyncio
+    async def test_unreadable_file(self, kind, tmp_path, capsys):
+        text_file = tmp_path / "message.txt"
+        if kind == "directory":
+            text_file.mkdir()
+        elif kind == "invalid_utf8":
+            text_file.write_bytes(b"\xff")
+        with patch.object(sys, "argv", ["speaky", "--file", str(text_file)]), \
+             patch("speaky.main.generate_and_cache_audio") as generate:
+            with pytest.raises(SystemExit) as exc_info:
+                await main()
+
+        assert exc_info.value.code == 1
+        assert "Error reading text file" in capsys.readouterr().err
+        generate.assert_not_called()
+
+    @pytest.mark.parametrize("arguments", [["--file"], ["--f", "message.txt", "hello"]])
+    def test_invalid_file_arguments(self, arguments, capsys):
+        with patch.object(sys, "argv", ["speaky", *arguments]):
+            with pytest.raises(SystemExit) as exc_info:
+                parse_arguments()
+        assert exc_info.value.code == 2
+        assert "error:" in capsys.readouterr().err
+
+    @pytest.mark.parametrize("flags", [[], ["--s"], ["--show-output"]])
+    @pytest.mark.asyncio
+    async def test_output_path_after_playback(self, flags, capsys):
+        cache_file = Path("relative-cache/audio.mp3")
+
+        def play_audio(file_path):
+            assert file_path == cache_file
+            assert capsys.readouterr().out == ""
+
+        with patch.object(sys, "argv", ["speaky", *flags, "hello"]), \
+             patch("speaky.main.load_config", return_value={}), \
+             patch("speaky.main.generate_and_cache_audio", return_value=cache_file), \
+             patch("speaky.main.play_audio_file", side_effect=play_audio) as playback:
+            await main()
+
+        playback.assert_called_once_with(cache_file)
+        expected = f"{cache_file.resolve()}\n" if flags else ""
+        assert capsys.readouterr().out == expected
+
+    @pytest.mark.parametrize("flag", ["--s", "--show-output"])
+    @pytest.mark.asyncio
+    async def test_output_path_not_printed_on_failure(self, flag, capsys):
+        cache_file = Path("relative-cache/audio.mp3")
+        with patch.object(sys, "argv", ["speaky", flag, "hello"]), \
+             patch("speaky.main.load_config", return_value={}), \
+             patch("speaky.main.generate_and_cache_audio", return_value=cache_file), \
+             patch("speaky.main.play_audio_file", side_effect=RuntimeError("Playback failed")):
+            with pytest.raises(SystemExit) as exc_info:
+                await main()
+
+        assert exc_info.value.code == 1
+        assert str(cache_file.resolve()) not in capsys.readouterr().out
     
     @patch('speaky.main.play_audio_file')
     @patch('speaky.main.generate_and_cache_audio')
