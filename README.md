@@ -88,9 +88,19 @@ speaky "The quick brown fox jumps over the lazy dog. This sentence contains ever
 # Clear the audio cache
 speaky --clear-cache
 
+# Print the full MP3 path after playback (also works with cached audio)
+speaky --show-output "Hello, world!"
+speaky --s "Hello, world!"
+
+# Speak the contents of a UTF-8 text file
+speaky --file "path/to/message.txt"
+speaky --f "path/to/message.txt" --show-output
+
 # Get help
 speaky --help
 ```
+
+Use either a text file or text arguments in each invocation, not both.
 ## How It Works
 
 1. **Input Processing**: Takes your text input from command line arguments
