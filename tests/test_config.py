@@ -64,7 +64,7 @@ class TestLoadConfig:
             "response_format": "mp3"
         }
         assert config == expected_config
-        mock_load_dotenv.assert_called_once()
+        mock_load_dotenv.assert_not_called()
 
     @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-api-key'})
     @patch('speaky.config.load_dotenv')

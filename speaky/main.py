@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from .audio import play_audio_file
 from .cache import clear_cache
-from .config import load_config
+from .config import load_config, install_default_config
 from .tts import generate_and_cache_audio  # type: ignore
 
 
