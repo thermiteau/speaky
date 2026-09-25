@@ -81,6 +81,7 @@ async def main():
 
 def cli_main():
     """Entry point for console script."""
+    install_default_config()
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
